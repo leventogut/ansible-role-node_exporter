@@ -18,6 +18,38 @@ This Ansible role installs and configures the Prometheus Node Exporter on Linux 
 - **Privileges**: Root access (uses `become: true`)
 - **Network**: Internet access to download Node Exporter binary
 
+## Installation
+
+To install this role, you can use the following commands:
+
+Create requirements.yml:
+
+```yaml
+---
+roles:
+  - name: node_exporter
+    src: ssh://git@github.com/leventogut/ansible-role-node_exporter.git
+    version: main
+    scm: git
+```
+
+Now install the required roles:
+
+```bash
+ansible-galaxy install -r requirements.yml
+```
+
+## Usage
+
+To use this role in your playbook, include it as follows:
+
+```yaml
+- hosts: monitoring
+  become: true
+  roles:
+    - node_exporter
+```
+
 ## Supported Architectures
 
 - `x86_64` / `amd64`
