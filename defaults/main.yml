@@ -1,12 +1,12 @@
 node_exporter__version: "1.9.1"
 node_exporter__force_install: false
 
-node_exporter_installed: "{{ 'node_exporter.service' in service_facts['ansible_facts']['services'] | default(false) }}"
+node_exporter_installed: "{{ 'node_exporter.service' in node_exporter__service_facts['ansible_facts']['services'] | default(false) }}"
 node_exporter__should_install: "{{ node_exporter_installed is not defined or not node_exporter_installed or node_exporter__force_install | bool }}"
 node_exporter__os: "{{ ansible_facts['system'] | lower }}"
 node_exporter__architecture: "{{ node_exporter__architecture_list[ansible_architecture] | default('') }}"
 node_exporter__systemd_installed: "{{ ansible_facts['systemd'] is defined and ansible_facts['systemd'] is not none | default(false) }}"
-
+node_exporter__install_path: "/usr/local/bin/node_exporter"
 node_exporter__supported_os:
   - linux
 

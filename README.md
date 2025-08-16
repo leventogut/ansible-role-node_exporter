@@ -5,6 +5,7 @@ This Ansible role installs and configures the Prometheus Node Exporter on Linux 
 ## Features
 
 - **Idempotent installation**: Only installs if Node Exporter is not present or version differs
+- **Version comparison**: Automatically detects installed version and upgrades/downgrades if different from desired version
 - **Force installation**: Override detection with `node_exporter__force_install` variable
 - **Multi-architecture support**: Supports AMD64, ARM64, and ARM architectures
 - **Systemd integration**: Creates and manages systemd service
@@ -101,13 +102,13 @@ None.
     - node_exporter
 ```
 
-### Specific Version
+### Specific Version (Auto-upgrade/downgrade)
 
 ```yaml
 - hosts: monitoring
   become: true
   vars:
-    node_exporter__version: "1.8.2"
+    node_exporter__version: "1.8.2"  # Will upgrade/downgrade if different version is installed
   roles:
     - node_exporter
 ```
@@ -125,15 +126,18 @@ ansible-playbook playbook.yml -e "node_exporter__version=1.8.2"
 ## Installation Process
 
 1. **Detection**: Checks if Node Exporter service exists
-2. **Download**: Downloads the appropriate binary for the target architecture
-3. **Extract**: Extracts the binary from the archive
-4. **Install**: Copies binary to system location and sets permissions
-5. **Service**: Creates and enables systemd service
-6. **Cleanup**: Removes temporary installation files
+2. **If installed**: Compare running version with `node_exporter__version`
+   - If versions match: Skip installation
+   - If versions differ: Install the specified version
+3. **Download**: Downloads the appropriate binary for the target architecture
+4. **Extract**: Extracts the binary from the archive
+5. **Install**: Copies binary to system location and sets permissions
+6. **Service**: Creates and enables systemd service
+7. **Cleanup**: Removes temporary installation files
 
 ## File Structure
 
-```
+```text
 roles/node_exporter/
 ├── defaults/
 │   └── main.yml          # Default variables
@@ -142,6 +146,8 @@ roles/node_exporter/
 │   └── linux.yml         # Linux-specific tasks
 ├── handlers/
 │   └── main.yml          # Service restart handlers
+├── meta/
+│   └── main.yml          # Meta documentation
 ├── templates/
 │   └── node_exporter.service.j2  # Systemd service template
 └── README.md             # This file

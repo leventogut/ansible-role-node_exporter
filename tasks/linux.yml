@@ -6,7 +6,7 @@
 - name: Install node_exporter binary
   ansible.builtin.copy:
     src: "{{ node_exporter__temp_dir.path }}/node_exporter-{{ node_exporter__version }}.{{ node_exporter__os }}-{{ node_exporter__architecture }}/node_exporter"
-    dest: /usr/local/bin/node_exporter
+    dest: "{{ node_exporter__install_path }}"
     mode: "0755"
     remote_src: true
   when: node_exporter__should_install

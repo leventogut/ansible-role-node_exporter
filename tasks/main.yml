@@ -1,6 +1,10 @@
+# TODO:  If node_exporter is installed, check the version of it, if the version is different then we need to install.
+# TODO: User should be able to specify extra parameters for node exporter
+# TODO: Text collector setup
+
 - name: Populate service facts
   ansible.builtin.service_facts:
-  register: service_facts
+  register: node_exporter__service_facts
 
 - name: Display Ansible facts
   ansible.builtin.debug:
@@ -9,7 +13,7 @@
 
 - name: Display Service facts
   ansible.builtin.debug:
-    msg: "{{ service_facts }}"
+    msg: "{{ node_exporter__service_facts }}"
   when: false
 
 - name: Distribution
@@ -20,6 +24,23 @@
   ansible.builtin.fail:
     msg: "Node Exporter installation is not supported on this operating system [{{ node_exporter__os }}]."
   when: node_exporter__should_install and node_exporter__os not in node_exporter__supported_os
+
+- name: Check the installed version of node_exporter
+  ansible.builtin.shell: set -o pipefail && node_exporter --version | grep "node_exporter, version" | awk '{print $3}'
+  register: node_exporter__version_check
+  changed_when: false
+  failed_when: false
+  when: node_exporter_installed
+
+- name: Display installed node_exporter version
+  ansible.builtin.debug:
+    msg: "Installed node_exporter version: {{ node_exporter__version_check.stdout }}"
+  when: node_exporter_installed
+
+- name: Set node_exporter__should_install to true if the installed version is different from the desired version
+  ansible.builtin.set_fact:
+    node_exporter__should_install: true
+  when: node_exporter_installed and node_exporter__version_check.stdout != node_exporter__version
 
 - name: Create temporary directory for installation files
   ansible.builtin.tempfile:
