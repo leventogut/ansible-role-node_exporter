@@ -1,0 +1,54 @@
+- name: Populate service facts
+  ansible.builtin.service_facts:
+  register: service_facts
+
+- name: Display Ansible facts
+  ansible.builtin.debug:
+    msg: "{{ ansible_facts }}"
+  when: false
+
+- name: Display Service facts
+  ansible.builtin.debug:
+    msg: "{{ service_facts }}"
+  when: false
+
+- name: Distribution
+  ansible.builtin.debug:
+    msg: "{{ node_exporter__os }} {{ ansible_architecture }} {{ ansible_distribution }} {{ ansible_distribution_version}}"
+
+- name: Create temporary directory for installation files
+  ansible.builtin.tempfile:
+    state: directory
+    prefix: node_exporter_installation
+  register: node_exporter__temp_dir
+  when: node_exporter__should_install
+
+- name: Download node_exporter binary
+  ansible.builtin.get_url:
+    url: "https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter__version }}/node_exporter-{{ node_exporter__version }}.{{ node_exporter__os }}-{{ node_exporter__architecture }}.tar.gz"
+    dest: "{{ node_exporter__temp_dir.path }}/node_exporter.archive"
+    mode: "0644"
+  when: node_exporter__should_install
+
+- name: Extract node_exporter binary
+  ansible.builtin.unarchive:
+    src: "{{ node_exporter__temp_dir.path }}/node_exporter.archive"
+    dest: "{{ node_exporter__temp_dir.path }}"
+    remote_src: true
+  when: node_exporter__should_install
+
+
+- name: Include OS specific tasks
+  ansible.builtin.include_tasks: "{{ node_exporter__os }}.yml"
+  when: node_exporter__should_install and node_exporter__os in node_exporter__supported_os
+
+- name: Display that this OS is not supported
+  ansible.builtin.fail:
+    msg: "Node Exporter installation is not supported on this operating system [{{ node_exporter__os }}]."
+  when: node_exporter__should_install and node_exporter__os not in node_exporter__supported_os
+
+- name: Remove temporary directory
+  ansible.builtin.file:
+    path: temp_dir.path
+    state: absent
+  when: node_exporter__should_install
