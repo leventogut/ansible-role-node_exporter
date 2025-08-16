@@ -16,6 +16,11 @@
   ansible.builtin.debug:
     msg: "{{ node_exporter__os }} {{ ansible_architecture }} {{ ansible_distribution }} {{ ansible_distribution_version}}"
 
+- name: Display that this OS is not supported
+  ansible.builtin.fail:
+    msg: "Node Exporter installation is not supported on this operating system [{{ node_exporter__os }}]."
+  when: node_exporter__should_install and node_exporter__os not in node_exporter__supported_os
+
 - name: Create temporary directory for installation files
   ansible.builtin.tempfile:
     state: directory
@@ -37,18 +42,12 @@
     remote_src: true
   when: node_exporter__should_install
 
-
 - name: Include OS specific tasks
   ansible.builtin.include_tasks: "{{ node_exporter__os }}.yml"
   when: node_exporter__should_install and node_exporter__os in node_exporter__supported_os
 
-- name: Display that this OS is not supported
-  ansible.builtin.fail:
-    msg: "Node Exporter installation is not supported on this operating system [{{ node_exporter__os }}]."
-  when: node_exporter__should_install and node_exporter__os not in node_exporter__supported_os
-
 - name: Remove temporary directory
   ansible.builtin.file:
-    path: temp_dir.path
+    path: node_exporter__temp_dir.path
     state: absent
   when: node_exporter__should_install
