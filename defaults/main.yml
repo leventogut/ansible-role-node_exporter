@@ -7,6 +7,13 @@ node_exporter__os: "{{ ansible_facts['system'] | lower }}"
 node_exporter__architecture: "{{ node_exporter__architecture_list[ansible_architecture] | default('') }}"
 node_exporter__systemd_installed: "{{ ansible_facts['systemd'] is defined and ansible_facts['systemd'] is not none | default(false) }}"
 node_exporter__install_path: "/usr/local/bin/node_exporter"
+node_exporter__listen_address: "0.0.0.0"
+node_exporter__listen_port: "9100"
+node_exporter__extra_params: ""
+node_exporter__textfile_directory: "/var/lib/node_exporter/textfile_collector"
+node_exporter__service_description: "Prometheus Node Exporter"
+node_exporter__user: "node_exporter"
+node_exporter__group: "node_exporter"
 node_exporter__supported_os:
   - linux
 

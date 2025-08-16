@@ -1,13 +1,13 @@
 [Unit]
-Description=Prometheus Node Exporter
+Description={{node_exporter__service_description }}
 Wants=network-online.target
 After=network-online.target
 
 [Service]
-User=node_exporter
-Group=node_exporter
+User={{ node_exporter__user }}
+Group={{  node_exporter__group }}
 Type=simple
-ExecStart={{ node_exporter__install_path }}
+ExecStart={{ node_exporter__install_path }} --web.listen-address={{ node_exporter__listen_address }}:{{ node_exporter__listen_port }} --collector.textfile.directory={{ node_exporter__textfile_directory }} {{ node_exporter__extra_params }}
 Restart=on-failure
 RestartSec=5s
 LimitNOFILE=4096

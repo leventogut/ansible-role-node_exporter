@@ -1,7 +1,3 @@
-# TODO:  If node_exporter is installed, check the version of it, if the version is different then we need to install.
-# TODO: User should be able to specify extra parameters for node exporter
-# TODO: Text collector setup
-
 - name: Populate service facts
   ansible.builtin.service_facts:
   register: node_exporter__service_facts
@@ -16,11 +12,11 @@
     msg: "{{ node_exporter__service_facts }}"
   when: false
 
-- name: Distribution
+- name: OS / Arch  / Distribution check
   ansible.builtin.debug:
     msg: "{{ node_exporter__os }} {{ ansible_architecture }} {{ ansible_distribution }} {{ ansible_distribution_version}}"
 
-- name: Display that this OS is not supported
+- name: Check if OS is supported
   ansible.builtin.fail:
     msg: "Node Exporter installation is not supported on this operating system [{{ node_exporter__os }}]."
   when: node_exporter__should_install and node_exporter__os not in node_exporter__supported_os
